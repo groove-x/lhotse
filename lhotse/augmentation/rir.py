@@ -31,8 +31,6 @@ class ReverbWithImpulseResponse(AudioTransform):
     rir_channels: List[int] = field(default_factory=lambda: [0])
     rir_generator: Optional[Union[dict, Callable]] = None
 
-    RIR_SCALING_FACTOR: float = 0.5**15
-
     def __post_init__(self):
         if isinstance(self.rir, dict):
             from lhotse.serialization import deserialize_item
@@ -136,14 +134,14 @@ class ReverbWithImpulseResponse(AudioTransform):
             d_in = 0 if input_is_mono else d
             augmented[d, :N_in] = samples[d_in]
             power_before_reverb = np.sum(np.abs(samples[d_in]) ** 2) / N_in
-            rir_d = rir_[d, :] * self.RIR_SCALING_FACTOR
+            rir_d = rir_[d, :]
 
             # Convolve the signal with impulse response.
             aug_d = convolve1d(
                 torch.from_numpy(samples[d_in]), torch.from_numpy(rir_d)
             ).numpy()
             shift_index = np.argmax(rir_d)
-            augmented[d, :] = aug_d[shift_index : shift_index + N_out]
+            augmented[d, :] = aug_d[shift_index: shift_index + N_out]
 
             if self.normalize_output:
                 power_after_reverb = np.sum(np.abs(augmented[d, :]) ** 2) / N_out
