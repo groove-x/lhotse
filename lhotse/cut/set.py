@@ -3726,7 +3726,7 @@ class LazyCutMixer(Dillable):
             # Note: we can't just call .to_eager() as the noise CutSet can technically be
             #       very large, or even hold data in-memory in case of webdataset/Lhotse Shar sources.
             def noise_gen():
-                yield from self.mix_in_cuts.repeat().shuffle(rng=rng, buffer_size=2000)
+                yield from self.mix_in_cuts.repeat().shuffle(rng=rng, buffer_size=60000)
 
         else:
             # Eager nose cuts are just fully reshuffled in a different order on each noise "epoch".
